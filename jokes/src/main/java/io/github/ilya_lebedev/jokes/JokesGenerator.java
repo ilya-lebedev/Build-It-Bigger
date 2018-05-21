@@ -6,7 +6,7 @@ public class JokesGenerator {
 
     public String getNextJoke() {
         jokeNumber++;
-        
+
         return "Very funny joke #" + jokeNumber;
     }
 
