@@ -6,4 +6,17 @@
     android:layout_height="match_parent"
     tools:context="io.github.ilya_lebedev.displayjoke.JokeActivity">
 
+    <TextView
+        android:id="@+id/tv_joke"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        tools:text="Funny joke"
+        android:textSize="22sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </android.support.constraint.ConstraintLayout>
