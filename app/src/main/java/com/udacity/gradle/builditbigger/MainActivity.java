@@ -3,6 +3,7 @@ package com.udacity.gradle.builditbigger;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,10 +24,42 @@ import io.github.ilya_lebedev.displayjoke.JokeActivity;
  */
 public class MainActivity extends AppCompatActivity {
 
+    private JokeLoadStartListener mJokeLoadStartListener;
+    private JokeLoadFinishListener mJokeLoadFinishListener;
+
+    public interface JokeLoadStartListener {
+        void onJokeLoadStart();
+    }
+
+    public interface JokeLoadFinishListener {
+        void onJokeLoadFinished(String joke);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        MainActivityFragment mainActivityFragment = new MainActivityFragment();
+
+        try {
+            mJokeLoadStartListener = (JokeLoadStartListener) mainActivityFragment;
+        } catch (ClassCastException ex) {
+            throw new ClassCastException(mainActivityFragment.toString()
+                    + " must implement JokeLoadStartListener interface");
+        }
+
+        try {
+            mJokeLoadFinishListener = (JokeLoadFinishListener) mainActivityFragment;
+        } catch (ClassCastException ex) {
+            throw new ClassCastException(mainActivityFragment.toString()
+                    + " must implement JokeLoadFinishListener interface");
+        }
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .add(R.id.container_fragment_main, mainActivityFragment)
+                .commit();
     }
 
 
@@ -54,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void tellJoke(View view) {
         new EndpointsAsyncTask().execute();
+        mJokeLoadStartListener.onJokeLoadStart();
     }
 
     private class EndpointsAsyncTask extends AsyncTask<Void, Void, String> {
@@ -84,8 +118,9 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String result) {
-            Intent startJokeActivityIntent = JokeActivity.generateIntent(getApplicationContext(), result);
-            startActivity(startJokeActivityIntent);
+            mJokeLoadFinishListener.onJokeLoadFinished(result);
+//            Intent startJokeActivityIntent = JokeActivity.generateIntent(getApplicationContext(), result);
+//            startActivity(startJokeActivityIntent);
         }
     }
 
