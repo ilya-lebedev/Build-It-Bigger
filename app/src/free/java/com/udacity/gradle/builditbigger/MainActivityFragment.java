@@ -8,8 +8,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 
 import io.github.ilya_lebedev.displayjoke.JokeActivity;
 
@@ -22,6 +24,13 @@ public class MainActivityFragment extends Fragment
 
     private View mContentContainer;
     private ProgressBar mProgressBar;
+
+    private InterstitialAd mInterstitialAd;
+
+    private boolean mIsJokeLoaded = false;
+    private boolean mIsAdFailedToLoad = false;
+
+    private String mJoke;
 
     public MainActivityFragment() {
     }
@@ -43,6 +52,44 @@ public class MainActivityFragment extends Fragment
                 .build();
         mAdView.loadAd(adRequest);
 
+        mInterstitialAd = new InterstitialAd(getContext());
+        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+
+        mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                // Code to be executed when an ad finishes loading.
+                if (mIsJokeLoaded) {
+                    mInterstitialAd.show();
+                }
+            }
+
+            @Override
+            public void onAdFailedToLoad(int errorCode) {
+                // Code to be executed when an ad request fails.
+                mIsAdFailedToLoad = true;
+                if (mIsJokeLoaded) {
+                    startJokeActivity();
+                }
+            }
+
+            @Override
+            public void onAdOpened() {
+                // Code to be executed when the ad is displayed.
+            }
+
+            @Override
+            public void onAdLeftApplication() {
+                // Code to be executed when the user has left the app.
+            }
+
+            @Override
+            public void onAdClosed() {
+                // Code to be executed when when the interstitial ad is closed.
+                startJokeActivity();
+            }
+        });
+
         return root;
     }
 
@@ -50,11 +97,22 @@ public class MainActivityFragment extends Fragment
     public void onJokeLoadStart() {
         mContentContainer.setVisibility(View.INVISIBLE);
         mProgressBar.setVisibility(View.VISIBLE);
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
     }
 
     @Override
     public void onJokeLoadFinished(String joke) {
-        Intent startJokeActivityIntent = JokeActivity.generateIntent(getContext(), joke);
+        mIsJokeLoaded = true;
+        mJoke = joke;
+        if (mInterstitialAd.isLoaded()) {
+            mInterstitialAd.show();
+        } else if (mIsAdFailedToLoad) {
+            startJokeActivity();
+        }
+    }
+
+    private void startJokeActivity() {
+        Intent startJokeActivityIntent = JokeActivity.generateIntent(getContext(), mJoke);
         startActivity(startJokeActivityIntent);
         mContentContainer.setVisibility(View.VISIBLE);
         mProgressBar.setVisibility(View.GONE);
