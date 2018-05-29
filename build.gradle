@@ -19,3 +19,14 @@ allprojects {
         google()
     }
 }
+
+task connectedPaidDebugAndroidTest() {
+    dependsOn ":backend:appengineStart"
+    finalizedBy ":app:connectedPaidDebugAndroidTest"
+}
+
+task testTask() {
+    group = "verification"
+    dependsOn connectedPaidDebugAndroidTest
+    finalizedBy ":backend:appengineStop"
+}
