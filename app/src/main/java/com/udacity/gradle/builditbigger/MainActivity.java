@@ -15,6 +15,7 @@ import com.google.api.client.googleapis.services.GoogleClientRequestInitializer;
 import com.udacity.gradle.builditbigger.backend.myApi.MyApi;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 
 /**
  * MainActivity
@@ -23,6 +24,8 @@ public class MainActivity extends AppCompatActivity {
 
     private JokeLoadStartListener mJokeLoadStartListener;
     private JokeLoadFinishListener mJokeLoadFinishListener;
+
+    private EndpointsAsyncTask mEndpointsAsyncTask;
 
     public interface JokeLoadStartListener {
         void onJokeLoadStart();
@@ -59,6 +62,14 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
+    @Override
+    protected void onDestroy() {
+        if (mEndpointsAsyncTask != null) {
+            mEndpointsAsyncTask.cancel(true);
+            mEndpointsAsyncTask = null;
+        }
+        super.onDestroy();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -83,12 +94,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void tellJoke(View view) {
-        new EndpointsAsyncTask().execute();
+        if (mEndpointsAsyncTask != null) {
+            mEndpointsAsyncTask.cancel(true);
+        }
+        mEndpointsAsyncTask = new EndpointsAsyncTask(mJokeLoadFinishListener);
+        mEndpointsAsyncTask.execute();
         mJokeLoadStartListener.onJokeLoadStart();
     }
 
-    private class EndpointsAsyncTask extends AsyncTask<Void, Void, String> {
+    private static class EndpointsAsyncTask extends AsyncTask<Void, Void, String> {
         private MyApi myApiService = null;
+
+        private WeakReference<JokeLoadFinishListener> jokeLoadFinishListenerWeakReference;
+
+        EndpointsAsyncTask(JokeLoadFinishListener jokeLoadFinishListener) {
+            this.jokeLoadFinishListenerWeakReference = new WeakReference<>(jokeLoadFinishListener);
+        }
 
         @Override
         protected String doInBackground(Void... params) {
@@ -117,7 +138,9 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String result) {
-            mJokeLoadFinishListener.onJokeLoadFinished(result);
+            if (jokeLoadFinishListenerWeakReference.get() != null) {
+                jokeLoadFinishListenerWeakReference.get().onJokeLoadFinished(result);
+            }
         }
     }
 
