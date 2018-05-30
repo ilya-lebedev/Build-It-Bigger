@@ -31,7 +31,7 @@ public class MyEndpoint {
         return response;
     }
 
-    /** A simple endpoint method that takes a name and says Hi back */
+    /** An endpoint method that return joke */
     @ApiMethod(name = "getJoke")
     public JokeBean getJoke() {
         JokeBean response = new JokeBean();
