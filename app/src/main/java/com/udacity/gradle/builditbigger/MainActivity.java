@@ -1,6 +1,5 @@
 package com.udacity.gradle.builditbigger;
 
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
@@ -16,8 +15,6 @@ import com.google.api.client.googleapis.services.GoogleClientRequestInitializer;
 import com.udacity.gradle.builditbigger.backend.myApi.MyApi;
 
 import java.io.IOException;
-
-import io.github.ilya_lebedev.displayjoke.JokeActivity;
 
 /**
  * MainActivity
@@ -43,14 +40,14 @@ public class MainActivity extends AppCompatActivity {
         MainActivityFragment mainActivityFragment = new MainActivityFragment();
 
         try {
-            mJokeLoadStartListener = (JokeLoadStartListener) mainActivityFragment;
+            mJokeLoadStartListener = mainActivityFragment;
         } catch (ClassCastException ex) {
             throw new ClassCastException(mainActivityFragment.toString()
                     + " must implement JokeLoadStartListener interface");
         }
 
         try {
-            mJokeLoadFinishListener = (JokeLoadFinishListener) mainActivityFragment;
+            mJokeLoadFinishListener = mainActivityFragment;
         } catch (ClassCastException ex) {
             throw new ClassCastException(mainActivityFragment.toString()
                     + " must implement JokeLoadFinishListener interface");
@@ -119,8 +116,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result) {
             mJokeLoadFinishListener.onJokeLoadFinished(result);
-//            Intent startJokeActivityIntent = JokeActivity.generateIntent(getApplicationContext(), result);
-//            startActivity(startJokeActivityIntent);
         }
     }
 
