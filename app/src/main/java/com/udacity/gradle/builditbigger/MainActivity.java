@@ -98,7 +98,9 @@ public class MainActivity extends AppCompatActivity {
                         .setRootUrl("http://10.0.2.2:8080/_ah/api/")
                         .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
                             @Override
-                            public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
+                            public void initialize(
+                                    AbstractGoogleClientRequest<?> abstractGoogleClientRequest)
+                                    throws IOException {
                                 abstractGoogleClientRequest.setDisableGZipContent(true);
                             }
                         });
